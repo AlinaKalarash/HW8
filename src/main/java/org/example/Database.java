@@ -1,6 +1,8 @@
 package org.example;
 
 
+import org.flywaydb.core.Flyway;
+
 import java.sql.*;
 
 public class Database {
@@ -15,11 +17,14 @@ public class Database {
 
         try {
             connection = DriverManager.getConnection(jdbcUrl, username, password);
+            flywayMigration(jdbcUrl, username, password);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         System.out.println("Connected yupi");
     }
+
+
 
     public static Database getInstance() {
         return INSTANCE;
@@ -35,6 +40,12 @@ public class Database {
         } catch (SQLException e) {
             throw new RuntimeException("Cannot run query");
         }
+    }
+
+
+    private void flywayMigration(String jdbcUrl, String username, String password) {
+        Flyway flyway = Flyway.configure().dataSource(jdbcUrl, username, password).load();
+        flyway.migrate();
     }
 
     public void closeConnection() {
