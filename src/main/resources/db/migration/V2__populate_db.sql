@@ -10,7 +10,7 @@ INSERT INTO worker (ID, NAME, BIRTHDAY, LEVEL, SALARY) VALUES
 (9, 'David Thomas', 1993, 'Middle', 3000),
 (10, 'Amanda Garcia', 1980, 'Senior', 8000);
 
-INSERT INTO client (ID, CLIENT_ID) VALUES
+INSERT INTO clients (ID, CLIENT_ID) VALUES
 (1, 1),
 (2, 2),
 (3, 3),

@@ -21,7 +21,7 @@ public class Database {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Connected yupi");
+        System.out.println("Connected");
     }
 
 
