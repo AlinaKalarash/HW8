@@ -1,13 +1,11 @@
 package org.example;
 
-import java.sql.Connection;
-
 public class Main {
     public static void main(String[] args) {
 //        Database database = Database.getInstance();
 //        Connection connection = Database.getInstance().getConnection();
 
-        ClientService1 service1 = new ClientService1();
+        ClientService service1 = new ClientService();
 
 //        System.out.println(service1.create("Adella", 1));
 //        System.out.println(service1.create("Richard", 2));
