@@ -10,7 +10,6 @@ import java.util.List;
 public class ClientService {
 
     private static final String INSERT = "INSERT INTO client (id, name) VALUES (?, ?)";
-    private static final String GET_ID = "SELECT id FROM client WHERE name = ?";
     private static final String SELECT_BY_ID = "SELECT id, name FROM client WHERE id= ?";
     private static final String SELECT_ALL = "SELECT * FROM client";
     private static final String UPDATE_NAME = "UPDATE client SET name = ? WHERE id= ?";
@@ -19,7 +18,6 @@ public class ClientService {
 
     private Client client;
     private PreparedStatement insertStatement;
-    private PreparedStatement getInsertStatement;
     private PreparedStatement selectByIdStatement;
     private PreparedStatement selectAllStatement;
     private PreparedStatement updateNameStatement;
@@ -32,7 +30,6 @@ public class ClientService {
         try {
             this.client = new Client();
             this.insertStatement = connection.prepareStatement(INSERT);
-            this.getInsertStatement = connection.prepareStatement(GET_ID);
             this.selectByIdStatement = connection.prepareStatement(SELECT_BY_ID);
             this.selectAllStatement = connection.prepareStatement(SELECT_ALL);
             this.updateNameStatement = connection.prepareStatement(UPDATE_NAME);
@@ -42,8 +39,6 @@ public class ClientService {
         }
     }
 
-//   TODO:
-//    зробити так, щоб айдішнік вибирався автоматично
     long create(String name, long id) {
         nameValidation(name);
         client.setName(name);
@@ -67,7 +62,6 @@ public class ClientService {
             try(ResultSet resultSet = selectByIdStatement.executeQuery()) {
                 while (resultSet.next()) {
                     client = new Client(resultSet.getLong("id"), resultSet.getString("name"));
-                    System.out.println("Here is your client: "+ client);
                 }
             } catch (SQLException e) {
                 System.out.println("ERROR with getting client: "+e.getMessage());;
@@ -112,9 +106,6 @@ public class ClientService {
             System.out.println("ERROR with listing all motherfuckers: " + e.getMessage());
         }
 
-//        for (Client client : clients) {
-//            System.out.println("ID: " + client.getId() + ", Name: " + client.getName());
-//        }
         return clients;
     }
 
@@ -124,13 +115,13 @@ public class ClientService {
         }
     }
     void nameValidation(String name) {
-        if(name.length() > 100 || name.isEmpty()) {
-            System.out.println("This name is not available");
-            throw new RuntimeException();
+        String nname = name.toLowerCase();
+        if(nname.length() > 100 || nname.isEmpty()) {
+            throw new RuntimeException("This name is not available");
         }
-        if (name.toLowerCase().contains("delete") || name.toLowerCase().contains("drop") || name.toLowerCase().contains("alter")) {
-            System.out.println("What do you think you doing?");
-            throw new RuntimeException();
+        if (nname.contains("delete") || nname.contains("drop") ||
+                nname.contains("alter") || nname.contains("table") || nname.contains("update")) {
+            throw new RuntimeException("What do you think you doing?");
         }
     }
 }
