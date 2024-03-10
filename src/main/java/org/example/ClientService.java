@@ -9,24 +9,17 @@ import java.util.List;
 
 public class ClientService {
 
-//      long create(String name) - додає нового клієнта з іменем name. Повертає ідентифікатор щойно створеного клієнта.
-//            String getById(long id) - повертає назву клієнта з ідентифікатором id
-//      void setName(long id, String name) - встановлює нове ім'я name для клієнта з ідентифікатором id
-//      void deleteById(long id) - видаляє клієнта з ідентифікатором id
-//      List<Clients> listAll() - повертає всіх клієнтів з БД у вигляді колекції об'єктів типу Clients
-//            (цей клас створи сам, у ньому має бути 2 поля - id та name)
-//    TODO:
-//      Передбач валідацію вхідних даних в методах класу ClientService. Якщо якісь вхідні дані некоректні
-//      (наприклад, ми намагаємось створити клієнта з занадто коротким чи довгим іменем) - відповідний метод має викидати Exception.
-
     private static final String INSERT = "INSERT INTO client (id, name) VALUES (?, ?)";
+    private static final String GET_ID = "SELECT id FROM client WHERE name = ?";
     private static final String SELECT_BY_ID = "SELECT id, name FROM client WHERE id= ?";
     private static final String SELECT_ALL = "SELECT * FROM client";
     private static final String UPDATE_NAME = "UPDATE client SET name = ? WHERE id= ?";
     private static final String DELETE_BY_ID = "DELETE FROM client WHERE id= ?";
 
 
+    private Client client;
     private PreparedStatement insertStatement;
+    private PreparedStatement getInsertStatement;
     private PreparedStatement selectByIdStatement;
     private PreparedStatement selectAllStatement;
     private PreparedStatement updateNameStatement;
@@ -37,7 +30,9 @@ public class ClientService {
 
     public ClientService() {
         try {
+            this.client = new Client();
             this.insertStatement = connection.prepareStatement(INSERT);
+            this.getInsertStatement = connection.prepareStatement(GET_ID);
             this.selectByIdStatement = connection.prepareStatement(SELECT_BY_ID);
             this.selectAllStatement = connection.prepareStatement(SELECT_ALL);
             this.updateNameStatement = connection.prepareStatement(UPDATE_NAME);
@@ -50,11 +45,14 @@ public class ClientService {
 //   TODO:
 //    зробити так, щоб айдішнік вибирався автоматично
     long create(String name, long id) {
-
+        nameValidation(name);
+        client.setName(name);
+        client.setId(this.client.getId()+1);
         try {
-            insertStatement.setLong(1, id);
+            insertStatement.setLong(1, client.getId());
             insertStatement.setString(2, name);
-            return insertStatement.executeUpdate();
+            insertStatement.executeUpdate();
+            return client.getId();
 
         } catch (SQLException e) {
             System.out.println("ERROR with creation: " + e.getMessage());
@@ -63,21 +61,26 @@ public class ClientService {
     }
 
     String getById(long id) {
-        Client client1 = null;
+        idValidation(id);
         try {
             selectByIdStatement.setLong(1, id);
-            ResultSet resultSet = selectByIdStatement.executeQuery();
-            while (resultSet.next()) {
-                client1 = new Client(resultSet.getLong("id"), resultSet.getString("name"));
-                System.out.println("Here is your client: "+ client1);
+            try(ResultSet resultSet = selectByIdStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    client = new Client(resultSet.getLong("id"), resultSet.getString("name"));
+                    System.out.println("Here is your client: "+ client);
+                }
+            } catch (SQLException e) {
+                System.out.println("ERROR with getting client: "+e.getMessage());;
             }
         } catch (SQLException e) {
-            System.out.println("ERROR with getting client: "+e.getMessage());;
+            throw new RuntimeException(e);
         }
-        return client1.getName();
+        return client.getName();
     }
 
     void setName(long id, String name) {
+        idValidation(id);
+        nameValidation(name);
         try {
             updateNameStatement.setString(1, name);
             updateNameStatement.setLong(2, id);
@@ -88,11 +91,12 @@ public class ClientService {
     }
 
     void deleteById(long id){
+        idValidation(id);
         try {
             deleteByIdStatement.setLong(1, id);
             deleteByIdStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("ERROR in deleting: "+e.getMessage());
+            System.out.println("ERROR in deleting: " + e.getMessage());
         }
 
     }
@@ -112,5 +116,21 @@ public class ClientService {
 //            System.out.println("ID: " + client.getId() + ", Name: " + client.getName());
 //        }
         return clients;
+    }
+
+    void idValidation(long id) {
+        if(id < 1) {
+            throw new RuntimeException();
+        }
+    }
+    void nameValidation(String name) {
+        if(name.length() > 100 || name.isEmpty()) {
+            System.out.println("This name is not available");
+            throw new RuntimeException();
+        }
+        if (name.toLowerCase().contains("delete") || name.toLowerCase().contains("drop") || name.toLowerCase().contains("alter")) {
+            System.out.println("What do you think you doing?");
+            throw new RuntimeException();
+        }
     }
 }

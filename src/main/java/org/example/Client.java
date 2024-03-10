@@ -8,6 +8,9 @@ public class Client {
     private long id;
     private String name;
 
+    public Client() {
+    }
+
     public Client(long id, String name) {
         this.id = id;
         this.name = name;
@@ -31,9 +34,9 @@ public class Client {
 
     @Override
     public String toString() {
-        return "Client{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+        return "\nClient{\n" +
+                " id=" + id +
+                ",\n name='" + name + '\'' +
                 '}';
     }
 }
