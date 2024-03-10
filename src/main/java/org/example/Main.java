@@ -1,7 +1,11 @@
 package org.example;
 
+import java.sql.Connection;
+
 public class Main {
     public static void main(String[] args) {
+        Database database = Database.getInstance();
+        Connection conn = Database.getInstance().getConnection();
 
         ClientService service1 = new ClientService();
 
@@ -20,5 +24,7 @@ public class Main {
         service1.deleteById(1);
 
         System.out.println(service1.listAll());
+
+        database.closeConnection();
     }
 }
